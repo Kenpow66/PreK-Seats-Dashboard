@@ -5,7 +5,7 @@ print_wd = "O:/Transfer Files/Data_Output_2023-24/PreK Seats Dashboard/2 Working
 print_del = "O:/Transfer Files/Data_Output_2023-24/PreK Seats Dashboard/3 Deliverables/"
 
 
-today0 <- read_excel("O:/Transfer Files/Data_Output_2023-24/PreK Seats Dashboard/1 Source Files/export_11-17-2023_Cleaned.xlsx")
+today0 <- read_excel("O:/Transfer Files/Data_Output_2023-24/PreK Seats Dashboard/1 Source Files/export_04-18-2024_Cleaned.xlsx")
 
 ```
 
@@ -48,7 +48,7 @@ todayECE = temp2 |> group_by(date, schId3, schName) |> summarise("ECE-Enrolled" 
 
 ## CSV template ----
 write_excel_csv(todayECE,
-  paste0(print_wd,"2023_1117_eceEnrollment.csv"),
+  paste0(print_wd,"2024_0418_eceEnrollment.csv"),
   na = "",
   append = FALSE,
   col_names = TRUE,
@@ -60,7 +60,7 @@ write_excel_csv(todayECE,
 ```{r}
 ## CSV template ----
 write_excel_csv(todayECEwide,
-  paste0(print_wd,"2023_1117_eceTopline.csv"),
+  paste0(print_wd,"2024_0418_eceTopline.csv"),
   na = "",
   append = FALSE,
   col_names = TRUE,
@@ -79,9 +79,9 @@ rm(list = ls(pattern = "^test"))
 rm(list = ls(pattern = "^ecse"))
 
 file.copy("C:/Users/lprice5/Downloads/homeroom_counts_for_capping_11-16-2023.csv",
-          "O:/Transfer Files/Data_Output_2023-24/PreK Seats Dashboard/1 Source Files/homeroom_counts_for_capping_11-16-2023.csv", overwrite = TRUE, copy.date = TRUE)
+          "O:/Transfer Files/Data_Output_2023-24/PreK Seats Dashboard/1 Source Files/homeroom_counts_for_capping_04-18-2024.csv", overwrite = TRUE, copy.date = TRUE)
 
-cap0today = read_csv("O:/Transfer Files/Data_Output_2023-24/PreK Seats Dashboard/1 Source Files/homeroom_counts_for_capping_11-16-2023.csv") |> as_tibble() |>
+cap0today = read_csv("O:/Transfer Files/Data_Output_2023-24/PreK Seats Dashboard/1 Source Files/homeroom_counts_for_capping_04-18-2023.csv") |> as_tibble() |>
   select(1, 2, 4, 7, 8, 9, 10)
 
 ```
@@ -133,7 +133,7 @@ cappingButNotMsched = anti_join(torBySection, pk0, by = c("tchName" = "tchLCFM")
 
 ```{r}
 write_excel_csv(cappingButNotMsched,
-  paste0(print_wd,"2023_1117_cappingButNotMsched_KEN.csv"),
+  paste0(print_wd,"2024_0418_cappingButNotMsched.csv"),
   na = "",
   append = FALSE,
   col_names = TRUE,

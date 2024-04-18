@@ -76,7 +76,7 @@ nesSchs <- read_excel("O://Transfer Files//Data_Output_2023-24//PreK Seats Dashb
 
 ```{r}
 ## labels for the map / value ranges ----
-#labVals <- read_excel("O://Transfer Files//Data_Output_2023-24//PreK Seats Dashboard//LP 2023-2024 PreK Programs by Campus.xlsx", sheet = "labValues")
+labValues <- read_excel("O://Transfer Files//Data_Output_2023-24//PreK Seats Dashboard//LP 2023-2024 PreK Programs by Campus.xlsx", sheet = "labValuesv1")
 
 
 ```

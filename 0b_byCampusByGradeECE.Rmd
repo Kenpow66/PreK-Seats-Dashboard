@@ -1,0 +1,164 @@
+
+```{r}
+# Set Working Dirs ----
+print_wd = "O:/Transfer Files/Data_Output_2023-24/PreK Seats Dashboard/2 Working Dir/"
+print_del = "O:/Transfer Files/Data_Output_2023-24/PreK Seats Dashboard/3 Deliverables/"
+
+
+today0 <- read_excel("O:/Transfer Files/Data_Output_2023-24/PreK Seats Dashboard/1 Source Files/export_11-17-2023_Cleaned.xlsx")
+
+```
+
+
+```{r}
+# Rename and destring
+today1 = today0 |> rename(date = 1, schId3 = 2, schName = 4, gradeStr = 5, stuEnroll = 6) |>
+  select(-c("SIS Campus Name")) |>
+    mutate(gradeNum = case_when(
+    gradeStr == "KG" ~ "00",
+    gradeStr == "PK4" ~ "-1",
+    gradeStr == "PK3" ~ "-2",
+    gradeStr == "EE" ~ "-3",
+    TRUE ~ gradeStr  )) |>
+  mutate(gradeNum = as.numeric(gradeNum)) |>
+  select(-c(gradeStr)) |>
+  filter(!is.na(stuEnroll))
+# drops from 4080 down to 1734
+# at 2007 on 29 sep and on 3 Oct, at 2005 on Oct 6, at 2002 on 13 Oct
+
+```
+
+```{r}
+# Turn WIDE BY GRADE
+todayWide = pivot_wider(today1, names_from = "gradeNum", values_from = "stuEnroll") |>
+  select(date, schId3, schName, "-3", "-2", "-1", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12")
+
+temp0 = replace(todayWide, is.na(todayWide),0)
+temp1 = temp0 |> select(1:6) |> rename("EE" = 4, "PK3" = 5, "PK4" = 6)
+
+temp2 = pivot_longer(temp1, cols = 4:6, names_to = "GradeLevel", values_to="Enrolled") |>
+  filter(Enrolled != 0)
+
+todayECEwide = pivot_wider(temp2, names_from = "GradeLevel", values_from = "Enrolled")
+
+todayECE = temp2 |> group_by(date, schId3, schName) |> summarise("ECE-Enrolled" = sum(Enrolled)) |> ungroup()
+```
+
+```{r}
+
+## CSV template ----
+write_excel_csv(todayECE,
+  paste0(print_wd,"2023_1117_eceEnrollment.csv"),
+  na = "",
+  append = FALSE,
+  col_names = TRUE,
+  quote = "needed",
+  escape = "none",  eol = "\r\n")
+
+```
+
+```{r}
+## CSV template ----
+write_excel_csv(todayECEwide,
+  paste0(print_wd,"2023_1117_eceTopline.csv"),
+  na = "",
+  append = FALSE,
+  col_names = TRUE,
+  quote = "needed",
+  escape = "none",  eol = "\r\n")
+
+```
+
+```{r}
+# Today's capping report source data ----
+# to import / isolate to ECE and reshape as needed
+# Waffle > SharePoint> Data Science and Vis > Documents > Capping Tool > Source Data > SIS > export-files_from-SIS
+rm(list = ls(pattern = "^temp"))
+rm(list = ls(pattern = "^unq"))
+rm(list = ls(pattern = "^test"))
+rm(list = ls(pattern = "^ecse"))
+
+file.copy("C:/Users/lprice5/Downloads/homeroom_counts_for_capping_11-16-2023.csv",
+          "O:/Transfer Files/Data_Output_2023-24/PreK Seats Dashboard/1 Source Files/homeroom_counts_for_capping_11-16-2023.csv", overwrite = TRUE, copy.date = TRUE)
+
+cap0today = read_csv("O:/Transfer Files/Data_Output_2023-24/PreK Seats Dashboard/1 Source Files/homeroom_counts_for_capping_11-16-2023.csv") |> as_tibble() |>
+  select(1, 2, 4, 7, 8, 9, 10)
+
+```
+
+```{r}
+# remember that HOMEROOM# actually means section ID
+capWide = pivot_longer(cap0today, 6:7, names_to = "grade", values_to = "value") |>
+  filter(!is.na(value)) |>
+  rename(schId3 = 1, schLongName = 2, tchLCFM = 3, section = 4, program = 5, grade = 6, enrN = 7)
+
+cap2 = left_join(capWide, cilCrosswalk, by = "schId3") |>
+  select(-c("schLongName", "sisName")) |>
+  select(schId3, schName, section, program, grade, enrN, tchLCFM)
+  length(unique(cap2$tchLCFM))
+  # 1328 on 11 oct and on 13 oct
+  # 1540 on 1 Nov
+  # 1542 on 17 Nov
+```
+
+```{r}
+
+capPkHr = cap2 |> filter(grade == "Pk") |> unique()
+capKgHr = cap2 |> filter(grade == "K") |> unique()
+
+tor0 = torBySection |> select(schId3, schName, tchName, emplId6) |> unique()
+# 706 on 6 oct
+# 708 on 11 oct and 13 oct
+# 709 on 17 oct
+# 658 on 1 Nov
+# 572 on 17 Nov
+
+pk0 = capPkHr |> select(schId3, schName, tchLCFM) |> unique()
+# 720 vs 713 on 11 oct and 13 oct
+# 711 on 17 oct
+# 709 on 1 Nov
+kg0 = capKgHr |> select(schId3, schName, tchLCFM) |> unique()
+# 754 vs 746 on 11 oct and 13 oct
+# 743 on 17 oct
+# 744 on 1 Nov
+
+# Export the teacher rows who are on the CAPPING REPORT but not the master schedule
+cappingButNotMsched = anti_join(torBySection, pk0, by = c("tchName" = "tchLCFM"))
+# N = 40
+# N = 63 on 24 Oct
+# N = 74
+# N = 61 on 17 Nov
+
+```
+
+```{r}
+write_excel_csv(cappingButNotMsched,
+  paste0(print_wd,"2023_1117_cappingButNotMsched_KEN.csv"),
+  na = "",
+  append = FALSE,
+  col_names = TRUE,
+  quote = "needed",
+  escape = "none",  eol = "\r\n")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

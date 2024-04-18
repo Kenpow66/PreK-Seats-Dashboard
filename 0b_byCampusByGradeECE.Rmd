@@ -78,10 +78,10 @@ rm(list = ls(pattern = "^unq"))
 rm(list = ls(pattern = "^test"))
 rm(list = ls(pattern = "^ecse"))
 
-file.copy("C:/Users/lprice5/Downloads/homeroom_counts_for_capping_11-16-2023.csv",
-          "O:/Transfer Files/Data_Output_2023-24/PreK Seats Dashboard/1 Source Files/homeroom_counts_for_capping_04-18-2024.csv", overwrite = TRUE, copy.date = TRUE)
+##file.copy("C:/Users/lprice5/Downloads/homeroom_counts_for_capping_11-16-2023.csv",
+         ## "O:/Transfer Files/Data_Output_2023-24/PreK Seats Dashboard/1 Source Files/homeroom_counts_for_capping_04-18-2024.csv", overwrite = TRUE, copy.date = TRUE)
 
-cap0today = read_csv("O:/Transfer Files/Data_Output_2023-24/PreK Seats Dashboard/1 Source Files/homeroom_counts_for_capping_04-18-2023.csv") |> as_tibble() |>
+cap0today = read_csv("O:/Transfer Files/Data_Output_2023-24/PreK Seats Dashboard/1 Source Files/homeroom_counts_for_capping_04-18-2024.csv") |> as_tibble() |>
   select(1, 2, 4, 7, 8, 9, 10)
 
 ```
